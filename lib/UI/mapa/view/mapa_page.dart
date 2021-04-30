@@ -1,22 +1,26 @@
+import 'package:counter/UI/mapa/bloc/miubicacion_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../mapa.dart';
-
-class MapaPage extends StatelessWidget {
+class MapaPage extends StatefulWidget {
   const MapaPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => MapaCubit(),
-      child: const MapaView(),
-    );
-  }
+  _MapaPageState createState() => _MapaPageState();
 }
 
-class MapaView extends StatelessWidget {
-  const MapaView({Key? key}) : super(key: key);
+class _MapaPageState extends State<MapaPage> {
+  @override
+  void initState() {
+    context.read<MiUbicacionBloc>().iniciarSeguimiento();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    context.read<MiUbicacionBloc>().detenerSeguimiento();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +28,46 @@ class MapaView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Mapa'),
       ),
-      body: Column(
-        children: [],
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                'Ubicacion',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                ),
+              ),
+            ),
+            BlocBuilder<MiUbicacionBloc, MiUbicacionState>(
+              builder: (context, state) => MapaContenido(state: state),
+            ),
+          ],
+        ),
       ),
     );
+  }
+}
+
+class MapaContenido extends StatelessWidget {
+  const MapaContenido({Key? key, required this.state}) : super(key: key);
+
+  final MiUbicacionState state;
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.existeUbicacion) {
+      return Column(
+        children: [
+          Text('Latitud : ${state.ubicacion?.latitude}'),
+          Text('Longitud : ${state.ubicacion?.longitude}'),
+        ],
+      );
+    } else {
+      return const Text('Ubicando...');
+    }
   }
 }

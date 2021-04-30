@@ -54,7 +54,7 @@ class _AccesoGpsViewState extends State<AccesoGpsView>
     return Scaffold(
       appBar: AppBar(
           title: const Text(
-            'Geolocalizacion',
+            'Permisos Geolocalizacion',
             style: TextStyle(fontSize: 21.0, color: Colors.black),
           ),
           centerTitle: true),

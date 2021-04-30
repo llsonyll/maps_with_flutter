@@ -18,7 +18,37 @@ class AccesoGpsPage extends StatelessWidget {
   }
 }
 
-class AccesoGpsView extends StatelessWidget {
+class AccesoGpsView extends StatefulWidget {
+  @override
+  _AccesoGpsViewState createState() => _AccesoGpsViewState();
+}
+
+// ignore: lines_longer_than_80_chars
+class _AccesoGpsViewState extends State<AccesoGpsView>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance?.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    print(state);
+    if (state == AppLifecycleState.resumed) {
+      if (await Permission.location.isGranted) {
+        await Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const MapaPage()));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,32 +58,25 @@ class AccesoGpsView extends StatelessWidget {
             style: TextStyle(fontSize: 21.0, color: Colors.black),
           ),
           centerTitle: true),
-      body: const Center(child: MainContent()),
-    );
-  }
-}
-
-class MainContent extends StatelessWidget {
-  const MainContent({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text('Se requiere permisos de geolocalizacion'),
-        const SizedBox(height: 10.0),
-        ElevatedButton(
-          onPressed: () async {
-            final status = await Permission.location.request();
-            accessGpsHandle(status, context);
-          },
-          child: const Text('Solicitar Acceso'),
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
-          ),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Se requiere permisos de geolocalizacion'),
+            const SizedBox(height: 10.0),
+            ElevatedButton(
+              onPressed: () async {
+                final status = await Permission.location.request();
+                accessGpsHandle(status, context);
+              },
+              child: const Text('Solicitar Acceso'),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.black),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -69,6 +92,7 @@ class MainContent extends StatelessWidget {
       case PermissionStatus.restricted:
         break;
       case PermissionStatus.permanentlyDenied:
+        openAppSettings();
         break;
       default:
     }

@@ -1,6 +1,8 @@
 import 'package:counter/UI/mapa/bloc/miubicacion_bloc.dart';
+import 'package:counter/UI/mapa/mapa.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapaPage extends StatefulWidget {
   const MapaPage({Key? key}) : super(key: key);
@@ -25,28 +27,8 @@ class _MapaPageState extends State<MapaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mapa'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Ubicacion',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
-              ),
-            ),
-            BlocBuilder<MiUbicacionBloc, MiUbicacionState>(
-              builder: (context, state) => MapaContenido(state: state),
-            ),
-          ],
-        ),
+      body: BlocBuilder<MiUbicacionBloc, MiUbicacionState>(
+        builder: (context, state) => MapaContenido(state: state),
       ),
     );
   }
@@ -59,15 +41,21 @@ class MapaContenido extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var cusco = const LatLng(-13.526462, -71.949989);
+    final blocMapa = context.read<MapaBloc>();
     if (state.existeUbicacion) {
-      return Column(
-        children: [
-          Text('Latitud : ${state.ubicacion?.latitude}'),
-          Text('Longitud : ${state.ubicacion?.longitude}'),
-        ],
+      return GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: state.ubicacion ?? cusco,
+          zoom: 15.0,
+        ),
+        // mapType: MapType.hybrid,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: false,
+        onMapCreated: blocMapa.inicializarMapa,
       );
     } else {
-      return const Text('Ubicando...');
+      return const Center(child: Text('Ubicando...'));
     }
   }
 }
